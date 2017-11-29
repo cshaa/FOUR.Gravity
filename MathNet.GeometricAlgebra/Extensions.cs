@@ -5,63 +5,6 @@ using System.Text;
 
 namespace MathNet
 {
-    /*public static class Combinatorics
-    {
-        public static uint  nCr(uint  n, uint  r) => nPr(n, r) / Factorial(r);
-        public static ulong nCr(ulong n, ulong r) => nPr(n, r) / Factorial(r);
-        
-        public static uint  nPr(uint  n, uint  r) => FallingFactorial(n, r);
-        public static ulong nPr(ulong n, ulong r) => FallingFactorial(n, r);
-        
-        public static uint  Factorial(uint  n) => FallingFactorial(n, n);
-        public static ulong Factorial(ulong n) => FallingFactorial(n, n);
-
-        public static int FallingFactorial(int n, int r)
-        {
-            int result = 1;
-            if (r>=0)
-                for (int m = n, k = 0; k < r; k++, m--) result *= m;
-            else
-                for (int m = n+1, k = 0; k > r; k--, m++) result *= m;
-            return result;
-        }
-        public static uint FallingFactorial(uint n, uint r)
-        {
-            uint result = 1;
-            for(uint m = n, k = 0; k < r; k++, m--) result *= m;
-            return result;
-        }
-        public static long FallingFactorial(long n, int r)
-        {
-            long result = 1;
-            if (r >= 0)
-                for (long m = n, k = 0; k < r; k++, m--) result *= m;
-            else
-                for (long m = n + 1, k = 0; k > r; k--, m++) result *= m;
-            return result;
-        }
-        public static ulong FallingFactorial(ulong n, ulong r)
-        {
-            ulong result = 1;
-            for (ulong m = n, k = 0; k < r; k++, m--) result *= m;
-            return result;
-        }
-        public static double FallingFactorial(double n, int r)
-        {
-            double result = 1, m = n;
-            if (r >= 0)
-                for (int k = 0; k < r; k++, m--) result *= m;
-            else
-                for (int k = 0; k > r; k--, m++) result *= (m+1);
-            return result;
-        }
-        public static double FallingFactorial(double n, uint r)
-        {
-            double result = 1, m = n;
-            for (uint k = 0; k < r; k++, m--) result *= m;
-            return result;
-        }
-    }*/
 
     public static class Binary
     {
@@ -155,56 +98,5 @@ namespace MathNet
         */
 
     }
-
-    public static class Misc
-    {
-
-        static Dictionary<Type, object> Subtract = new Dictionary<Type, object>();
-
-        static Func<T,T,T> GetSubtract<T>()
-        {
-            if(Subtract.ContainsKey(typeof(T)))
-            {
-                return (Func<T, T, T>)Subtract[typeof(T)];
-            }
-            else
-            {
-                ParameterExpression a = Expression.Parameter(typeof(T), "a"),
-                                    b = Expression.Parameter(typeof(T), "b");
-
-                BinaryExpression body = Expression.Subtract(a, b);
-
-                var func = Expression.Lambda<Func<T, T, T>>(body, a, b).Compile();
-
-                Subtract[typeof(T)] = func;
-
-                return func;
-            }
-        }
-
-        public static (double,T) FloorAndRemainder<T>(T x, Func<T,double> f, Func<double,T> inv_f)
-        {
-            var sub = GetSubtract<T>();
-
-            var floor = Math.Floor(f(x));
-
-            return (floor, sub(x, inv_f(floor)));
-        }
-
-
-        public static int    TriangularNumber(int    n) => (n * (n + 1)) / 2;
-        public static uint   TriangularNumber(uint   n) => (n * (n + 1)) / 2;
-        public static long   TriangularNumber(long   n) => (n * (n + 1)) / 2;
-        public static ulong  TriangularNumber(ulong  n) => (n * (n + 1)) / 2;
-        public static float  TriangularNumber(float  n) => (n * (n + 1)) / 2;
-        public static double TriangularNumber(double n) => (n * (n + 1)) / 2;
-
-        public static double IndexOfTrinangularNumber(ulong n)
-            => (Math.Sqrt(1 + 8*n) - 1) / 2;
-
-        public static (ulong, ulong) IndexAndRemainderOfTriangularNumber(ulong n)
-            => ((ulong,ulong))FloorAndRemainder(n,
-                x=>IndexOfTrinangularNumber((ulong)x),
-                TriangularNumber);
-    }
+ 
 }
