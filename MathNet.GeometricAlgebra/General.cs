@@ -2,39 +2,11 @@
 
 namespace MathNet.GeometricAlgebra
 {
-    public class Space
-    {
-        public uint Dimension { get; }
-        public uint PositiveDimension { get; }
-        public uint NegativeDimension { get; }
-        public uint NilpotentDimension { get; }
-
-        public Space(uint positive, uint negative = 0, uint nil = 0){
-            var dimension = positive + negative + nil;
-
-            if (dimension <= 64)
-            {
-                Dimension = dimension;
-                PositiveDimension = positive;
-                NegativeDimension = negative;
-                NilpotentDimension = nil;
-            }
-            else throw new ArgumentOutOfRangeException("The total dimension cannot be greater than 64.");
-        }
-
-        public int BasisSquare(uint baseNumber)
-        {
-            if ( (baseNumber -= PositiveDimension) <= 0 ) return 1;
-            if ( (baseNumber -= NegativeDimension) <= 0 ) return -1;
-            if ( (baseNumber -= NilpotentDimension) <= 0) return 0;
-            throw new IndexOutOfRangeException("Base number out of range");
-        }
-        
-    }
+    
 
     public class Multivector
     {
-        double[] Elements { get; }
+        public double[] Elements { get; }
         Space Space;
 
         // Constructor, Copy & Clone 
@@ -42,7 +14,13 @@ namespace MathNet.GeometricAlgebra
         public Multivector(Space space)
         {
             Space = space;
-            Elements = new double[(ulong)1<<(int)Space.Dimension];
+            Elements = new double[1ul<<(int)Space.Dimension];
+        }
+
+        double ScalarPart
+        {
+            get => Elements[0];
+            set => Elements[0] = value;
         }
 
         public Multivector Copy(Multivector M)
@@ -207,7 +185,7 @@ namespace MathNet.GeometricAlgebra
                     {
                         var lsb = Binary.LeastSignificantBit(f);
                         if ((e >> lsb + 1) % 2 != 0) sign = -sign;
-                        sign*=space.BasisSquare((uint)lsb);
+                        sign*=space.BasisSquared((uint)lsb);
 
                         e ^= 1ul << lsb;
                         f &= f - 1;

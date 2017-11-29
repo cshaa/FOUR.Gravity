@@ -7,14 +7,17 @@ namespace MathNet.GeometricAlgebra.UnitTests
     [TestFixture]
     public class MultivectorTests
     {
-        //MathNet.GeometricAlgebra.Multivector a = new Multivector();
+
+        Space R3 = new Space(2);
+        Space R4 = new Space(4);
+        Space R64 = new Space(64);
 
         Dictionary<string, Multivector> M;
 
         [OneTimeSetUp]
         public void SetUp()
         {
-
+            M["GeneralMultivector4"] = new Multivector(R4);
         }
 
         [Test]

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace MathNet
 {
-    public static class Combinatorics
+    /*public static class Combinatorics
     {
         public static uint  nCr(uint  n, uint  r) => nPr(n, r) / Factorial(r);
         public static ulong nCr(ulong n, ulong r) => nPr(n, r) / Factorial(r);
@@ -60,7 +61,7 @@ namespace MathNet
             for (uint k = 0; k < r; k++, m--) result *= m;
             return result;
         }
-    }
+    }*/
 
     public static class Binary
     {
@@ -136,7 +137,7 @@ namespace MathNet
 
         public static int LeastSignificantBit(ulong b)
             => b==0 ? -1 : MagicTable[((ulong)((long)b & -(long)b) * Magic) >> 58];
-        
+
 
         /*
         //This one might be faster
@@ -152,5 +153,58 @@ namespace MathNet
             return MagicTable[b * Magic >> 58];
         }
         */
+
+    }
+
+    public static class Misc
+    {
+
+        static Dictionary<Type, object> Subtract = new Dictionary<Type, object>();
+
+        static Func<T,T,T> GetSubtract<T>()
+        {
+            if(Subtract.ContainsKey(typeof(T)))
+            {
+                return (Func<T, T, T>)Subtract[typeof(T)];
+            }
+            else
+            {
+                ParameterExpression a = Expression.Parameter(typeof(T), "a"),
+                                    b = Expression.Parameter(typeof(T), "b");
+
+                BinaryExpression body = Expression.Subtract(a, b);
+
+                var func = Expression.Lambda<Func<T, T, T>>(body, a, b).Compile();
+
+                Subtract[typeof(T)] = func;
+
+                return func;
+            }
+        }
+
+        public static (double,T) FloorAndRemainder<T>(T x, Func<T,double> f, Func<double,T> inv_f)
+        {
+            var sub = GetSubtract<T>();
+
+            var floor = Math.Floor(f(x));
+
+            return (floor, sub(x, inv_f(floor)));
+        }
+
+
+        public static int    TriangularNumber(int    n) => (n * (n + 1)) / 2;
+        public static uint   TriangularNumber(uint   n) => (n * (n + 1)) / 2;
+        public static long   TriangularNumber(long   n) => (n * (n + 1)) / 2;
+        public static ulong  TriangularNumber(ulong  n) => (n * (n + 1)) / 2;
+        public static float  TriangularNumber(float  n) => (n * (n + 1)) / 2;
+        public static double TriangularNumber(double n) => (n * (n + 1)) / 2;
+
+        public static double IndexOfTrinangularNumber(ulong n)
+            => (Math.Sqrt(1 + 8*n) - 1) / 2;
+
+        public static (ulong, ulong) IndexAndRemainderOfTriangularNumber(ulong n)
+            => ((ulong,ulong))FloorAndRemainder(n,
+                x=>IndexOfTrinangularNumber((ulong)x),
+                TriangularNumber);
     }
 }
