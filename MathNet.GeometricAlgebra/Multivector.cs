@@ -185,7 +185,7 @@ namespace MathNet.GeometricAlgebra
                     {
                         var lsb = Binary.LeastSignificantBit(f);
                         if ((e >> lsb + 1) % 2 != 0) sign = -sign;
-                        sign*=space.BasisSquared((uint)lsb);
+                        sign*=space.BasisSquared(1, (uint)lsb);
 
                         e ^= 1ul << lsb;
                         f &= f - 1;

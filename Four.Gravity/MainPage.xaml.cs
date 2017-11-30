@@ -14,6 +14,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Windows.UI;
+using MathNet.GeometricAlgebra;
 
 // Dokumentaci k šabloně položky Prázdná stránka najdete na adrese https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x405
 
@@ -26,7 +27,8 @@ namespace Four.Gravity
     {
         public MainPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
+            var space = new Space(4);
         }
 
         private void CanvasControl_Draw(CanvasControl sender, CanvasDrawEventArgs args)
