@@ -5,11 +5,9 @@ VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Four.Gravity", "Four.Gravity\Four.Gravity.csproj", "{9210BE84-C39D-4B45-B576-16066034B936}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathNet.GeometricAlgebra", "MathNet.GeometricAlgebra\MathNet.GeometricAlgebra.csproj", "{5C914A90-0D37-4E65-8825-861F1A0EF7B6}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathNet.GeometricAlgebra.UnitTests", "MathNet.GeometricAlgebra.UnitTests\MathNet.GeometricAlgebra.UnitTests.csproj", "{4F1B8CD7-5D68-4629-8066-0690B1BB52CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NET Standard Library", "NET Standard Library\NET Standard Library.csproj", "{214BC44D-F8F0-4D90-A834-A443CE72DA53}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathNet.GeometricAlgebra", "MathNet.GeometricAlgebra\MathNet.GeometricAlgebra.csproj", "{214BC44D-F8F0-4D90-A834-A443CE72DA53}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,22 +45,6 @@ Global
 		{9210BE84-C39D-4B45-B576-16066034B936}.Release|x86.ActiveCfg = Release|x86
 		{9210BE84-C39D-4B45-B576-16066034B936}.Release|x86.Build.0 = Release|x86
 		{9210BE84-C39D-4B45-B576-16066034B936}.Release|x86.Deploy.0 = Release|x86
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Debug|ARM.Build.0 = Debug|Any CPU
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Debug|x64.ActiveCfg = Debug|x64
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Debug|x64.Build.0 = Debug|x64
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Debug|x86.ActiveCfg = Debug|x86
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Debug|x86.Build.0 = Debug|x86
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Release|ARM.ActiveCfg = Release|Any CPU
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Release|ARM.Build.0 = Release|Any CPU
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Release|x64.ActiveCfg = Release|x64
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Release|x64.Build.0 = Release|x64
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Release|x86.ActiveCfg = Release|x86
-		{5C914A90-0D37-4E65-8825-861F1A0EF7B6}.Release|x86.Build.0 = Release|x86
 		{4F1B8CD7-5D68-4629-8066-0690B1BB52CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4F1B8CD7-5D68-4629-8066-0690B1BB52CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F1B8CD7-5D68-4629-8066-0690B1BB52CC}.Debug|ARM.ActiveCfg = Debug|Any CPU

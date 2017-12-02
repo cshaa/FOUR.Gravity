@@ -29,6 +29,7 @@ namespace Four.Gravity
         {
             InitializeComponent();
             var space = new Space(4);
+            Multivector a;
         }
 
         private void CanvasControl_Draw(CanvasControl sender, CanvasDrawEventArgs args)

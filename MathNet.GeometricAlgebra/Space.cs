@@ -70,8 +70,8 @@ namespace MathNet.GeometricAlgebra
              * when it's even, it doesn't.
              * 
              * "Number of flips is even"
-             * ⇒ (∃k∈N) N*(N-1)/2 = 2k
-             * ⇒ N*(N-1) = 4k
+             * ⇒ (∃int k) N*(N-1)/2 = 2k
+             * ⇒ (∃int k) N*(N-1) = 4k
              * ⇒ N*(N-1) mod 4 = 0
              * ⇒ N mod 4 ∈ {0, 1}
              * ⇒ N mod 4 < 2
@@ -98,12 +98,12 @@ namespace MathNet.GeometricAlgebra
         void SetUpConversionBetweenIndexAndBladeBasis()
         {
 
-            indexFromBladeBasisCache = new ulong[Dimension][];
+            indexFromBladeBasisCache = new ulong[Dimension+1][];
             bladeBasisFromIndexCache = new(uint, uint)[1ul << (int)Dimension];
 
             // Array of indices of basis vectors this basis blade is composed of.
-            // The maximum length we will need is D choose D/2
-            int[] indices = new int[(int)Combinations((int)Dimension, (int)Dimension / 2)];
+            // The maximum length we will need is equal to the dimension of the space
+            int[] indices = new int[Dimension];
 
             for (uint grade = 0; grade <= Dimension; grade++)
             {
@@ -150,7 +150,7 @@ namespace MathNet.GeometricAlgebra
                     }
 
                     // If all indices are at the end, move on to the next grade
-                    if(j==0) break;
+                    if(j<1) break;
                 }
 
                 // All combinations of this grade are done, let's move on!
