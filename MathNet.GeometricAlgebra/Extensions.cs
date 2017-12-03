@@ -8,7 +8,7 @@ namespace MathNet
 
     public static class Binary
     {
-        public static int ContBits(uint i)
+        public static int CountBits(uint i)
         {
             i = i - ((i >> 1) & 0x55555555);
             i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
@@ -81,6 +81,9 @@ namespace MathNet
         public static int LeastSignificantBit(ulong b)
             => b==0 ? -1 : MagicTable[((ulong)((long)b & -(long)b) * Magic) >> 58];
 
+
+        // TODO LeastSignificantBit(uint b)
+        // TODO UnitTests
 
         /*
         //This one might be faster

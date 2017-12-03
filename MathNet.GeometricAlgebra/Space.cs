@@ -16,14 +16,15 @@ namespace MathNet.GeometricAlgebra
         {
             var dimension = positive + negative + nil;
 
-            if (dimension <= 64)
+            if (dimension <= 30)
             {
                 Dimension = dimension;
                 PositiveDimension = positive;
                 NegativeDimension = negative;
                 NilpotentDimension = nil;
             }
-            else throw new ArgumentOutOfRangeException("The total dimension cannot be greater than 64.");
+            else throw new ArgumentOutOfRangeException("The total dimension cannot be greater than 30.");
+            // “No one will ever need terabytes of memory.” —Bill Gates
 
             SetUpConversionBetweenIndexAndBladeBasis();
         }
@@ -64,7 +65,15 @@ namespace MathNet.GeometricAlgebra
             /*
              * The number of flips you have to perform when squaring
              * a basis blade of N basis vectors is the triangular
-             * number of N, that is N*(N-1)/2.
+             * number of N-1, that is N*(N-1)/2.
+             * 
+             * e₁e₂e₃e₄ * e₁e₂e₃e₄   = −e₁²e₂e₃e₄ * e₂e₃e₄ (3 flips)
+             * e₂e₃e₄ * e₂e₃e₄ *(-1) = −e₂²e₃e₄ * e₃e₄     (2 flips)
+             * e₃e₄ * e₃e₄     *(-1) = e₃²e₄ * e₄          (1 flip )
+             * e₄ * e₄               = e₄²            = 1  (0 flips)
+             * 
+             * Total of 3+2+1 = tri(3) = tri(N-1) = 6 flips.
+             * 
              * 
              * When the number of flips is odd, the sign gets flipped,
              * when it's even, it doesn't.
@@ -81,6 +90,39 @@ namespace MathNet.GeometricAlgebra
              */
         }
 
+        public (ulong BasisBlade, int Sign) BasisMultiply(ulong e, ulong f)
+        {
+            int sign = 1;
+            while (f != 0)
+            {
+                // Get the number of the lowest basis vector
+                var lsb = Binary.LeastSignificantBit(f);
+
+                // e₁e₂(e₄e₇e₁₂) * e₂e₃
+                //      ^^^^^^^ Count these basis vectors.
+                // If the number is odd, flip the sign
+                if (Binary.CountBits(e >> lsb + 1) % 2 != 0)
+                    sign = -sign;
+
+                // If the basis vector is a factor of both the multiplicator
+                // and the multiplicand, square it and change the sign respectively.
+                // If the basis vector is nilpotent, return scalar zero.
+                if( (e & 1ul << lsb) != 0)
+                {
+                    sign *= BasisSquared(1, (uint)lsb);
+                    if (sign == 0) return (0, 0);
+                }
+
+                // Flip the presence of the basis vector in e (if it's already
+                // there, remove it, and vice versa) and remove it from f.
+                e ^= 1ul << lsb;
+                f &= f - 1;
+            }
+            return (e, sign);
+            
+            //TODO explain a little more
+        }
+
 
         ulong[][] indexFromBladeBasisCache;
         (uint, uint)[] bladeBasisFromIndexCache;
@@ -93,7 +135,7 @@ namespace MathNet.GeometricAlgebra
 
 
 
-        /* Set up the conversion between (basis blade index) and (grade, base number) */
+        /* Set up the conversion between (basis blade index) and (grade and base number) */
 
         void SetUpConversionBetweenIndexAndBladeBasis()
         {

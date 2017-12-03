@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MathNet.GeometricAlgebra
 {
@@ -6,10 +7,10 @@ namespace MathNet.GeometricAlgebra
 
     public class Multivector
     {
-        public double[] Elements { get; }
+        public IList<double> Elements { get; }
         Space Space;
 
-        // Constructor, Copy & Clone 
+        // Constructor, Copy & Clone
 
         public Multivector(Space space)
         {
@@ -28,7 +29,7 @@ namespace MathNet.GeometricAlgebra
             if (Space != M.Space) throw new ArgumentException("Cannot copy a multivector from a different space.");
 
             var Me = M.Elements;
-            for (long i = 0, l = Elements.LongLength; i < l; i++)
+            for (int i = 0, l = Elements.Count; i < l; i++)
             {
                 Elements[i] = Me[i];
             }
@@ -57,7 +58,7 @@ namespace MathNet.GeometricAlgebra
             if (Space != M.Space) throw new ArgumentException("Cannot subtract two multivectors from different spaces.");
 
             var Me = M.Elements;
-            for (long i = 0, l = Elements.LongLength; i < l; i++)
+            for (int i = 0, l = Elements.Count; i < l; i++)
             {
                 Elements[i] += Me[i];
             }
@@ -93,7 +94,7 @@ namespace MathNet.GeometricAlgebra
             if (Space != M.Space) throw new ArgumentException("Cannot subtract two multivectors from different spaces.");
 
             var Me = M.Elements;
-            for (long i = 0, l = Elements.LongLength; i < l; i++)
+            for (int i = 0, l = Elements.Count; i < l; i++)
             {
                 Elements[i] -= Me[i];
             }
@@ -127,7 +128,7 @@ namespace MathNet.GeometricAlgebra
 
         public Multivector Negate()
         {
-            for (long i = 0, l = Elements.LongLength; i < l; i++)
+            for (int i = 0, l = Elements.Count; i < l; i++)
             {
                 Elements[i] = -Elements[i];
             }
@@ -146,7 +147,7 @@ namespace MathNet.GeometricAlgebra
         public Multivector Mul(double s) => Multiply(s);
         public Multivector Multiply(double s)
         {
-            for(long i = 0, l = Elements.LongLength; i < l; i++)
+            for(int i = 0, l = Elements.Count; i < l; i++)
             {
                 Elements[i] *= s;
             }
@@ -170,28 +171,19 @@ namespace MathNet.GeometricAlgebra
 
             var space = a.Space;
 
-            double[] aE = a.Elements,
-                     bE = b.Elements,
-                     cE = c.Elements;
+            IList<double> aE = a.Elements,
+                          bE = b.Elements,
+                          cE = c.Elements;
 
-            var l = a.Elements.LongLength;
+            var l = (ulong)a.Elements.Count;
 
-            for (long i = 0; i < l; i++)
-            for (long j = 0; j < l; j++)
+            for (ulong i = 0; i < l; i++)
+            for (ulong j = 0; j < l; j++)
             {
-                    ulong e = (ulong)i, f = (ulong)j;
-                    int sign = 1;
-                    while (f!=0)
-                    {
-                        var lsb = Binary.LeastSignificantBit(f);
-                        if ((e >> lsb + 1) % 2 != 0) sign = -sign;
-                        sign*=space.BasisSquared(1, (uint)lsb);
-
-                        e ^= 1ul << lsb;
-                        f &= f - 1;
-                    }
-                    cE[e] = sign * aE[i] * bE[j];
+                var (e, sign) = space.BasisMultiply(i, j);
+                cE[(int)e] = sign * aE[(int)i] * bE[(int)j];
             }
+            
 
             return c;
         }
@@ -213,5 +205,79 @@ namespace MathNet.GeometricAlgebra
         public static Multivector operator *(Multivector a, Multivector b)
             => new Multivector(a.Space).Add(a).Mul(b);
 
+
+
+
+
+        // Conjugate, involution, reverse
+        // https://en.wikipedia.org/wiki/Clifford_algebra#Antiautomorphisms
+
+        
+        public Multivector Involute()
+        {
+            var l = Elements.Count;
+
+            for (int i = 0; i < l; i++)
+                Elements[i]
+                    = (Space.BladeBasisFromIndex((ulong)i).Grade % 2) == 0
+                    ?  Elements[i]
+                    : -Elements[i];
+
+            return this;
+
+            // Implementations: https://goo.gl/b8eSSY https://goo.gl/fWscjS
+            // TODO find papers on this
+            // TODO prove
+        }
+
+        public static Multivector Involute(Multivector M)
+            => (new Multivector(M.Space)).Copy(M).Involute();
+
+
+        public Multivector Reverse()
+        {
+            var l = Elements.Count;
+
+            for (int i = 0; i < l; i++)
+                Elements[i]
+                    = ((Space.BladeBasisFromIndex((ulong)i).Grade / 2) % 2) == 0
+                    ? Elements[i]
+                    : -Elements[i];
+
+            return this;
+
+            // Implementations: https://goo.gl/vwZW7E https://goo.gl/Zs8AZP
+            // TODO find papers on this
+            // TODO prove
+        }
+
+        public static Multivector Reverse(Multivector M)
+            => M.Clone().Reverse();
+
+        ///<summary>Returns the reverse of M</summary>
+        public static Multivector operator ~(Multivector M)
+            => M.Clone().Reverse();
+
+
+        public Multivector Conjugate()
+        {
+            var l = Elements.Count;
+
+            for (int i = 0; i < l; i++)
+                Elements[i]
+                    = (((Space.BladeBasisFromIndex((ulong)i).Grade - 1) / 2) % 2) == 0
+                    ? Elements[i]
+                    : -Elements[i];
+
+            return this;
+
+            // Implementations: https://goo.gl/XZqsUT https://goo.gl/KQ1GCv
+            // TODO find papers on this
+            // TODO prove
+        }
+
+        public static Multivector Conjugate(Multivector M)
+            => (new Multivector(M.Space)).Copy(M).Conjugate();
     }
+
 }
