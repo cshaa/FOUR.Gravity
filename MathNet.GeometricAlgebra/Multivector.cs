@@ -7,15 +7,18 @@ namespace MathNet.GeometricAlgebra
 
     public class Multivector
     {
-        public IList<double> Elements { get; }
+        protected IList<double> Elements;
         Space Space;
 
         // Constructor, Copy & Clone
 
         public Multivector(Space space)
+            => new Multivector(space, new double[1ul<<(int)space.Dimension]);
+
+        protected Multivector(Space space, IList<double> elements)
         {
             Space = space;
-            Elements = new double[1ul<<(int)Space.Dimension];
+            Elements = elements;
         }
 
         double ScalarPart
