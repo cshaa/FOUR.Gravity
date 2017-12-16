@@ -1,19 +1,25 @@
-﻿using System;
+﻿using MathNet.GeometricAlgebra.Extensions;
+using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace MathNet.GeometricAlgebra
 {
     
 
-    public class Multivector
+    public class Multivector : IEquatable<Multivector>
     {
         protected IList<double> Elements;
         Space Space;
 
-        // Constructor, Copy & Clone
+
+
+
+
+        // Basic OOP methods
 
         public Multivector(Space space)
-            => new Multivector(space, new double[1ul<<(int)space.Dimension]);
+            : this(space, new double[1ul << (int)space.Dimension]) { }
 
         protected Multivector(Space space, IList<double> elements)
         {
@@ -21,10 +27,16 @@ namespace MathNet.GeometricAlgebra
             Elements = elements;
         }
 
-        double ScalarPart
+        public double ScalarPart
         {
             get => Elements[0];
             set => Elements[0] = value;
+        }
+
+        public double this[int index]
+        {
+            get => Elements[index];
+            set => Elements[index] = value;
         }
 
         public Multivector Copy(Multivector M)
@@ -43,6 +55,72 @@ namespace MathNet.GeometricAlgebra
         public Multivector(Multivector M) : this(M.Space) => Copy(M);
         public Multivector Clone() => new Multivector(Space).Copy(this);
         public static Multivector Clone(Multivector M) => M.Clone();
+
+
+
+
+
+        // Equals
+
+        /// <summary>
+        /// Compares the values of this Multivector with those of M.
+        /// </summary>
+        /// <param name="M">The other Multivector</param>
+        /// <returns>True if the Multivectors are from the space and their coordinates are identical, false otherwise.</returns>
+        public bool Equals(Multivector M)
+        {
+            if (M == null) return false;
+            if (Space != M.Space) return false;
+
+            if (Elements is ISparseList<double> A
+            && M.Elements is ISparseList<double> B)
+            {
+                foreach (var i in A.Keys.Union(B.Keys))
+                    if (Elements[i] != M.Elements[i]) return false;
+
+                return true;
+            }
+
+            for (int i = 0; i < Elements.Count; i++)
+                if (Elements[i] != M.Elements[i]) return false;
+
+            return true;
+        }
+
+        override public bool Equals(object M) => Equals(M as Multivector);
+
+        public static bool operator ==(Multivector M, Multivector N)
+        {
+            if ( ((object)M) == null || ((object)N) == null )
+                return Equals(M, N);
+
+            return M.Equals(N);
+        }
+
+        public static bool operator ==(Multivector M, object N) => M == N as Multivector;
+        public static bool operator ==(object M, Multivector N) => M as Multivector == N;
+
+        public static bool operator !=(Multivector M, Multivector N)
+        {
+            if (((object)M) == null || ((object)N) == null)
+                return !Equals(M, N);
+
+            return !M.Equals(N);
+        }
+
+
+        public static bool operator !=(Multivector M, object N) => M != N as Multivector;
+        public static bool operator !=(object M, Multivector N) => M as Multivector != N;
+
+        override public int GetHashCode()
+        {
+            unchecked
+            {
+                var hash = Space.GetHashCode();
+                foreach (var e in Elements) hash = hash * 29 + e.GetHashCode();
+                return hash;
+            }
+        }
 
 
 

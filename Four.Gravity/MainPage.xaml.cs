@@ -15,6 +15,7 @@ using Windows.UI.Xaml.Navigation;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Windows.UI;
 using MathNet.GeometricAlgebra;
+using static MathNet.GeometricAlgebra.Constants.Basis;
 
 // Dokumentaci k šabloně položky Prázdná stránka najdete na adrese https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x405
 
@@ -28,8 +29,12 @@ namespace Four.Gravity
         public MainPage()
         {
             InitializeComponent();
-            var space = new Space(4);
-            Multivector a;
+            var S = new Space(4);
+            var A = new Multivector(S)
+            {
+                [EScalar] = 42,
+                ScalarPart = 43
+            };
         }
 
         private void CanvasControl_Draw(CanvasControl sender, CanvasDrawEventArgs args)

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MathNet.GeometricAlgebra
 {
-    class SparseMultivector : Multivector
+    public class SparseMultivector : Multivector
     {
         
         public SparseMultivector(Space space)

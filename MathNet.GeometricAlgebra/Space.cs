@@ -24,7 +24,7 @@ namespace MathNet.GeometricAlgebra
                 NilpotentDimension = nil;
             }
             else throw new ArgumentOutOfRangeException("The total dimension cannot be greater than 30.");
-            // “No one will ever need terabytes of memory.” —Bill Gates
+            // “No one will ever need 34.3 T of memory.” —Bill Gates
 
             SetUpConversionBetweenIndexAndBladeBasis();
         }

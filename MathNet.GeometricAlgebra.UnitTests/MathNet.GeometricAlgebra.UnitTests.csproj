@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NET Standard Library\MathNet.GeometricAlgebra.csproj" />
+    <ProjectReference Include="..\MathNet.GeometricAlgebra\MathNet.GeometricAlgebra.csproj" />
   </ItemGroup>
 
 </Project>
