@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MathNet.GeometricAlgebra.Extensions
+namespace MathNet.Extensions
 {
     public interface ISparseList<T> : ICloneable, IList<T>, ICollection<T>, IEnumerable<T>, IStructuralComparable, IStructuralEquatable
     {

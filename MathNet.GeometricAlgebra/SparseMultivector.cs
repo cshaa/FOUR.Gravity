@@ -1,4 +1,4 @@
-﻿using MathNet.GeometricAlgebra.Extensions;
+﻿using MathNet.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Text;

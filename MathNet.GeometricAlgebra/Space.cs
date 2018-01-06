@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MathNet.Extensions;
 using static MathNet.Numerics.Combinatorics;
 
 namespace MathNet.GeometricAlgebra
@@ -29,15 +30,23 @@ namespace MathNet.GeometricAlgebra
             SetUpConversionBetweenIndexAndBladeBasis();
         }
 
+        public Multivector Zero
+        {
+            get => new Multivector(this);
+        }
 
         public int BasisSquared(uint grade, uint baseNumber)
         {
             if (grade == 1)
             {
-                if ((baseNumber -= PositiveDimension) <= 0) return 1;
-                if ((baseNumber -= NegativeDimension) <= 0) return -1;
-                if ((baseNumber -= NilpotentDimension) <= 0) return 0;
-                throw new IndexOutOfRangeException("Base number out of range");
+                if (baseNumber < PositiveDimension) return 1;
+                else baseNumber -= PositiveDimension;
+
+                if (baseNumber < NegativeDimension) return -1;
+                else baseNumber -= NegativeDimension;
+
+                if (baseNumber < NilpotentDimension) return 0;
+                else throw new IndexOutOfRangeException("Base number out of range");
             }
 
             return BasisSquared(IndexFromBladeBasis(grade,baseNumber));
@@ -92,6 +101,11 @@ namespace MathNet.GeometricAlgebra
 
         public (ulong BasisBlade, int Sign) BasisMultiply(ulong e, ulong f)
         {
+            if(e==1 && f==1)
+            {
+                Console.WriteLine();
+            }
+
             int sign = 1;
             while (f != 0)
             {
@@ -109,7 +123,9 @@ namespace MathNet.GeometricAlgebra
                 // If the basis vector is nilpotent, return scalar zero.
                 if( (e & 1ul << lsb) != 0)
                 {
-                    sign *= BasisSquared(1, (uint)lsb);
+                    var a = lsb;
+                    var b = (uint)lsb;
+                    sign *= BasisSquared(1, b);
                     if (sign == 0) return (0, 0);
                 }
 

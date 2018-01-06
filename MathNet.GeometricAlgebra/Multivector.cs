@@ -1,13 +1,15 @@
-﻿using MathNet.GeometricAlgebra.Extensions;
+﻿using MathNet.Extensions;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text;
+using static MathNet.Numerics.Combinatorics;
 
 namespace MathNet.GeometricAlgebra
 {
     
 
-    public class Multivector : IEquatable<Multivector>
+    public class Multivector : IApproximatelyEquatable<Multivector>, IFormattable
     {
         protected IList<double> Elements;
         Space Space;
@@ -18,21 +20,41 @@ namespace MathNet.GeometricAlgebra
 
         // Basic OOP methods
 
+        /**
+         * <summary>Creates new multivector in the Clifford algebra <paramref name="space"/>.</summary>
+         * <param name="space">The Clifford algebra this multivector is an element of.</param>
+         */
         public Multivector(Space space)
             : this(space, new double[1ul << (int)space.Dimension]) { }
+        
 
-        protected Multivector(Space space, IList<double> elements)
+        /** <summary>
+         *      Creates new multivector in Clifford algebra <paramref name="space"/>
+         *      whose elements will be stored in <paramref name="elements"/>.
+         *  </summary>
+         *  <param name="space">The Clifford algebra this multivector is an element of.</param>
+         *  <param name="elements">List that will be used to store the elements´of the multivector.</param>
+         */
+        public Multivector(Space space, IList<double> elements)
         {
             Space = space;
             Elements = elements;
         }
 
+
+        /// <summary>Returns the scalar part (the grade zero part) of the multivector.</summary>
         public double ScalarPart
         {
             get => Elements[0];
             set => Elements[0] = value;
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public double this[int index]
         {
             get => Elements[index];
@@ -57,6 +79,53 @@ namespace MathNet.GeometricAlgebra
         public static Multivector Clone(Multivector M) => M.Clone();
 
 
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            var str = new StringBuilder();
+            var beginning = true;
+
+            for (int g = 0; g <= Space.Dimension; g++)
+            for (int i = 0; i < Combinations((int)Space.Dimension, g); i++)
+            {
+                var index = (int)Space.IndexFromBladeBasis((uint)g, (uint)i);
+
+                if (Elements[index] == 0) continue;
+
+                if (beginning)
+                {
+                    beginning = false;
+                }
+                else
+                {
+                    str.Append(" + ");
+                }
+                
+                str.Append(Elements[index].ToString(format, formatProvider));
+
+                if (index != 0) str.Append(" ");
+
+                int j = 1;
+                while(index != 0)
+                {
+                    if ((index & 1 << j-1) != 0)
+                    {
+                        str.Append("e");
+                        str.Append(j);
+                        index &= index - 1;
+                    }
+                    j++;
+                }
+            }
+
+            if (str.Length == 0) str.Append("0");
+
+            str.Append(" ∈ Space#");
+            str.Append(Space.GetHashCode().ToString("x").Substring(0,5));
+
+            return str.ToString();
+        }
+
+
 
 
 
@@ -67,25 +136,27 @@ namespace MathNet.GeometricAlgebra
         /// </summary>
         /// <param name="M">The other Multivector</param>
         /// <returns>True if the Multivectors are from the space and their coordinates are identical, false otherwise.</returns>
-        public bool Equals(Multivector M)
+        public bool Equals(Multivector other)
         {
-            if (M == null) return false;
-            if (Space != M.Space) return false;
+            if (other == null) return false;
+            if (Space != other.Space) return false;
 
             if (Elements is ISparseList<double> A
-            && M.Elements is ISparseList<double> B)
+            && other.Elements is ISparseList<double> B)
             {
                 foreach (var i in A.Keys.Union(B.Keys))
-                    if (Elements[i] != M.Elements[i]) return false;
+                    if (Elements[i] != other.Elements[i]) return false;
 
                 return true;
             }
 
             for (int i = 0; i < Elements.Count; i++)
-                if (Elements[i] != M.Elements[i]) return false;
+                if (Elements[i] != other.Elements[i]) return false;
 
             return true;
         }
+
+
 
         override public bool Equals(object M) => Equals(M as Multivector);
 
@@ -120,6 +191,27 @@ namespace MathNet.GeometricAlgebra
                 foreach (var e in Elements) hash = hash * 29 + e.GetHashCode();
                 return hash;
             }
+        }
+
+
+        public bool ApproximatelyEquals(Multivector other, double? delta = null, double? relativeDelta = null, long? ulpsApart = null)
+        {
+            if (other == null) return false;
+            if (Space != other.Space) return false;
+
+            if (Elements is ISparseList<double> A
+            && other.Elements is ISparseList<double> B)
+            {
+                foreach (var i in A.Keys.Union(B.Keys))
+                    if (!Elements[i].ApproximatelyEquals(other.Elements[i], delta, relativeDelta, ulpsApart)) return false;
+
+                return true;
+            }
+
+            for (int i = 0; i < Elements.Count; i++)
+                if (!Elements[i].ApproximatelyEquals(other.Elements[i], delta, relativeDelta, ulpsApart)) return false;
+
+            return true;
         }
 
 
@@ -243,8 +335,8 @@ namespace MathNet.GeometricAlgebra
             => new Multivector(a).Mul(b);
 
 
-        /// <summary>Multiply two multivectors a & b and write the result to c.</summary>
-        /// <param name="c">Will be overwritten with the result of multiplication.</param>
+        /// <summary>Multiply two multivectors a and b and add the result to c.</summary>
+        /// <param name="c">The result of multiplication will be added to this multivector.</param>
         /// <returns>Returns c for chaining.</returns>
         public static Multivector Multiply(Multivector a, Multivector b, ref Multivector c)
         {
@@ -262,7 +354,7 @@ namespace MathNet.GeometricAlgebra
             for (ulong j = 0; j < l; j++)
             {
                 var (e, sign) = space.BasisMultiply(i, j);
-                cE[(int)e] = sign * aE[(int)i] * bE[(int)j];
+                cE[(int)e] += sign * aE[(int)i] * bE[(int)j];
             }
             
 
@@ -359,6 +451,7 @@ namespace MathNet.GeometricAlgebra
 
         public static Multivector Conjugate(Multivector M)
             => (new Multivector(M.Space)).Copy(M).Conjugate();
+
     }
 
 }

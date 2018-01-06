@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathNet.GeometricAlgebra.Extensions
+namespace MathNet.Extensions
 {
     static class Ergonomy
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 
-namespace MathNet
+namespace MathNet.Extensions
 {
 
     public static class Binary
@@ -99,6 +99,16 @@ namespace MathNet
             return MagicTable[b * Magic >> 58];
         }
         */
+
+
+        public static long ToBits(this double d) => BitConverter.DoubleToInt64Bits(d);
+
+        public static int ToBits(this float f) => BitConverter.ToInt32(BitConverter.GetBytes(f), 0);
+
+        public static double DoubleFromBits(this long l) => BitConverter.Int64BitsToDouble(l);
+
+        public static float SingleFromBits(this int i) => BitConverter.ToSingle(BitConverter.GetBytes(i), 0);
+
 
     }
  
