@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using static System.Math;
 using static MathNet.GeometricAlgebra.Constants.Basis;
 using System;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace MathNet.GeometricAlgebra.UnitTests
 {
-    using Assert = MathNet.Extensions.Assert;
+    using Assert = MathNet.Extensions.UnitTesting.Assert;
 
     [TestFixture]
     public class MultivectorTests
@@ -351,22 +352,210 @@ namespace MathNet.GeometricAlgebra.UnitTests
             Assert.AreApproximatelyEqual(A * (B + C), (A * B) + (A * C));
             Assert.AreApproximatelyEqual((A + B) * C, (A * C) + (B * C));
 
-            /*Assert.AreApproximatelyEqual(new Multivector(R3)
+            Assert.AreApproximatelyEqual(new Multivector(R3)
             {
-                ScalarPart = 14,
+                ScalarPart = 11,
                 [E1] = 8/13d + 10*PI,
                 [E2] = 6/13d,
-                [E3] = 10/13d - 2*PI,
-                [E12] = 233,
+                [E3] = 10/13d - 8*PI,
+                [E12] = 237,
                 [E13] = -101,
-                [E23] = 158,
+                [E23] = 153,
                 [E123] = -6*PI
-            }, G * A);*/
+            }, G * A);
             
             Assert.AreEqual(M["Vector3A"], A);
             Assert.AreEqual(M["Vector3B"], B);
             Assert.AreEqual(M["Vector3C"], C);
             Assert.AreEqual(M["GeneralMultivector3"], G);
+        }
+
+
+
+
+
+        [Test]
+        public void WedgeMultiplication()
+        {
+            var A = M["Vector3A"].Clone().VectorPart;
+            var B = M["Vector3B"].Clone().VectorPart;
+            var C = M["Vector3C"].Clone().VectorPart;
+            var G = M["GeneralMultivector3"].Clone();
+
+            var A4 = M["Vector4A"].Clone();
+            var G4 = M["GeneralMultivector4"].Clone();
+
+            Assert.AreEqual(A ^ B, A.Clone().Wedge(B));
+
+            Assert.AreApproximatelyEqual(A ^ (B ^ C), (A ^ B) ^ C);
+            Assert.AreApproximatelyEqual(A ^ (B + C), (A ^ B) + (A ^ C));
+            Assert.AreApproximatelyEqual((A + B) ^ C, (A ^ C) + (B ^ C));
+
+            Assert.AreApproximatelyEqual(A ^ B, -B ^ A);
+            Assert.AreApproximatelyEqual(A * B, A.Dot(B) + (A ^ B));
+            Assert.AreApproximatelyEqual(B * A, A.Dot(B) - (A ^ B));
+            Assert.AreApproximatelyEqual(B ^ B, R3.Zero);
+            Assert.AreApproximatelyEqual(A4 ^ A4, R4.Zero);
+
+            Assert.AreApproximatelyEqual(new Multivector(R3)
+            {
+                [E1]   = 7/13d,
+                [E2]   = 7/325d,
+                [E3]   = -1/78d,
+                [E12]  = -11.2,
+                [E13]  = 5/12d,
+                [E23]  = -1/4d,
+                [E123] = -0.28 * PI
+            }, B ^ G);
+
+
+            /*
+            
+            General3:
+                [EScalar] = 2 / 13d,
+                [E1] = 5,
+                [E2] = -3,
+                [E13] = 2 * PI,
+                [E123] = 42
+
+            3A:
+                [E1] = 4,
+                [E2] = 3,
+                [E3] = 5
+
+            3B:
+                [E1] = 3.5,
+                [E2] = 0.14,
+                [E3] = -1 / 12d
+
+            3C:
+                [E2] = 8,
+                [E3] = -7
+
+            General4:
+                [EScalar] = 5 / 3d,
+                [E1] = 12,
+                [E3] = -45,
+                [E14] = 3 / 5d,
+                [E23] = -6.2832,
+                [E34] = 1,
+                [E124] = -3,
+                [E134] = 86,
+                [E1234] = -5
+
+            4A:
+                [E1] = 5,
+                [E2] = -3,
+                [E3] = 9,
+                [E4] = -14
+
+            4B:
+                [E1] = 21,
+                [E3] = 3
+
+            4C:
+                [E2] = -6,
+                [E3] = -5,
+                [E4] = 4
+            
+            */
+
+
+
+            Assert.AreEqual(M["Vector3A"], A);
+            Assert.AreEqual(M["Vector3B"], B);
+            Assert.AreEqual(M["Vector3C"], C);
+            Assert.AreEqual(M["GeneralMultivector3"], G);
+
+            Assert.AreEqual(M["Vector4A"], A4);
+            Assert.AreEqual(M["GeneralMultivector4"], G4);
+        }
+
+
+
+
+
+        [Test]
+        public void PureGrade()
+        {
+            var A = M["GeneralMultivector3"].Clone();
+
+            Assert.AreEqual(2 / 13d, A.ScalarPart);
+
+            Assert.AreEqual(new Multivector(R3)
+            {
+                ScalarPart = 2 / 13d
+            },
+            A.GetGrade(0));
+
+            Assert.AreEqual(new Multivector(R3)
+            {
+                [E1] = 5,
+                [E2] = -3
+            },
+            A.GetGrade(1));
+
+            Assert.AreEqual(new Multivector(R3)
+            {
+                [E13] = 2 * PI
+            },
+            A.GetGrade(2));
+
+            Assert.AreEqual(new Multivector(R3)
+            {
+                [E123] = 42
+            },
+            A.GetGrade(3));
+
+
+
+            A.ScalarPart = -3;
+
+            Assert.AreEqual(-3, A.ScalarPart);
+
+            Assert.AreEqual(new Multivector(R3)
+            {
+                ScalarPart = -3
+            },
+            A.GetGrade(0));
+
+
+
+            Assert.AreEqual(new Vector(R3, new double[]
+            {
+                5, -3, 0
+            }),
+            A.VectorPart);
+
+            A.VectorPart = new Vector(R3, Vector<double>.Build.Dense(new double[] { 1, 2, 3 }));
+
+            Assert.AreEqual(new Vector(R3, new double[]
+            {
+                1, 2, 3
+            }),
+            A.VectorPart);
+
+
+
+            A.SetGrade(new PureGrade(R3, 2)
+            {
+                [E12] = 42,
+                [E13] = 43,
+                [E23] = 44
+            });
+
+            Assert.AreEqual(new Multivector(R3)
+            {
+                ScalarPart = -3,
+                [E1] = 1,
+                [E2] = 2,
+                [E3] = 3,
+                [E12] = 42,
+                [E13] = 43,
+                [E23] = 44,
+                [E123] = 42
+            }, A);
+
         }
     }
 }

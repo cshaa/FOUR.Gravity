@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathNet.Extensions
+namespace MathNet.Extensions.UnitTesting
 {
     class Assert : NUnit.Framework.Assert
     {

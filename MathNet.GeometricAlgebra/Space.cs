@@ -35,21 +35,21 @@ namespace MathNet.GeometricAlgebra
             get => new Multivector(this);
         }
 
-        public int BasisSquared(uint grade, uint baseNumber)
+        public int BasisSquared(uint grade, uint component)
         {
             if (grade == 1)
             {
-                if (baseNumber < PositiveDimension) return 1;
-                else baseNumber -= PositiveDimension;
+                if (component < PositiveDimension) return 1;
+                else component -= PositiveDimension;
 
-                if (baseNumber < NegativeDimension) return -1;
-                else baseNumber -= NegativeDimension;
+                if (component < NegativeDimension) return -1;
+                else component -= NegativeDimension;
 
-                if (baseNumber < NilpotentDimension) return 0;
+                if (component < NilpotentDimension) return 0;
                 else throw new IndexOutOfRangeException("Base number out of range");
             }
 
-            return BasisSquared(IndexFromBladeBasis(grade,baseNumber));
+            return BasisSquared(IndexFromBladeBasis(grade,component));
         }
 
         public int BasisSquared(ulong index)
@@ -99,7 +99,7 @@ namespace MathNet.GeometricAlgebra
              */
         }
 
-        public (ulong BasisBlade, int Sign) BasisMultiply(ulong e, ulong f)
+        public (ulong Index, int Sign) BasisMultiply(ulong e, ulong f)
         {
             if(e==1 && f==1)
             {
@@ -143,10 +143,10 @@ namespace MathNet.GeometricAlgebra
         ulong[][] indexFromBladeBasisCache;
         (uint, uint)[] bladeBasisFromIndexCache;
 
-        public ulong IndexFromBladeBasis(uint grade, uint baseNumber)
-            => indexFromBladeBasisCache[grade][baseNumber];
+        public ulong IndexFromBladeBasis(uint grade, uint component)
+            => indexFromBladeBasisCache[grade][component];
 
-        public (uint Grade, uint BaseNumber) BladeBasisFromIndex(ulong index)
+        public (uint Grade, uint Component) BladeBasisFromIndex(ulong index)
             => bladeBasisFromIndexCache[index];
 
 
