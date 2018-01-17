@@ -277,6 +277,7 @@ namespace MathNet.GeometricAlgebra
 
         public static bool operator !=(Multivector M, Multivector N)
         {
+            // cast to use the operator ==(object, object) and avoid recursion
             if (((object)M) == null || ((object)N) == null)
                 return !Equals(M, N);
 

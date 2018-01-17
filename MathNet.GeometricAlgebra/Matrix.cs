@@ -1,11 +1,12 @@
-﻿using System;
+﻿using MathNet.Extensions;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
 namespace MathNet.GeometricAlgebra
 {
-    public class Matrix
+    public class Matrix : IApproximatelyEquatable<Matrix>
     {
         public double[,] Elements => _Elements;
         protected double[,] _Elements;
@@ -66,6 +67,90 @@ namespace MathNet.GeometricAlgebra
         public Matrix(Matrix M) : this(M.SourceSpace, M.TargetSpace) => Copy(M);
         public Matrix Clone() => new Matrix(SourceSpace, TargetSpace).Copy(this);
         public static Matrix Clone(Matrix M) => M.Clone();
+
+
+
+
+
+        // Equals
+
+        /// <summary>
+        /// Compares the values of this Multivector with those of M.
+        /// </summary>
+        /// <param name="M">The other Multivector</param>
+        /// <returns>True if the Multivectors are from the space and their coordinates are identical, false otherwise.</returns>
+        public bool Equals(Matrix other)
+        {
+            if (other == null) return false;
+            if (SourceSpace != other.SourceSpace) return false;
+            if (TargetSpace != other.TargetSpace) return false;
+            
+            for (int row = 0; row < RowCount; row++)
+            for (int col = 0; col < ColumnCount; col++)
+            {
+                if (this[row, col] != other[row, col]) return false;
+            }
+
+            return true;
+        }
+
+
+
+        override public bool Equals(object M) => Equals(M as Matrix);
+
+        public static bool operator ==(Matrix M, Matrix N)
+        {
+            // cast to use the operator ==(object, object) and avoid recursion
+            if (((object)M) == null || ((object)N) == null)
+                return Equals(M, N);
+
+            return M.Equals(N);
+        }
+
+        public static bool operator ==(Matrix M, object N) => M == N as Matrix;
+        public static bool operator ==(object M, Matrix N) => M as Matrix == N;
+
+        public static bool operator !=(Matrix M, Matrix N)
+        {
+            // cast to use the operator !=(object, object) and avoid recursion
+            if (((object)M) == null || ((object)N) == null)
+                return !Equals(M, N);
+
+            return !M.Equals(N);
+        }
+
+
+        public static bool operator !=(Matrix M, object N) => M != N as Matrix;
+        public static bool operator !=(object M, Matrix N) => M as Matrix != N;
+
+        override public int GetHashCode()
+        {
+            unchecked
+            {
+                var hash = SourceSpace.GetHashCode() * 29 + TargetSpace.GetHashCode();
+                foreach (var e in Elements) hash = hash * 29 + e.GetHashCode();
+                return hash;
+            }
+        }
+
+
+        public bool ApproximatelyEquals(Matrix other, double? delta = null, double? relativeDelta = null, long? ulpsApart = null)
+        {
+            if (other == null) return false;
+            if (SourceSpace != other.SourceSpace) return false;
+            if (TargetSpace != other.TargetSpace) return false;
+
+            for (int row = 0; row < RowCount; row++)
+            for (int col = 0; col < ColumnCount; col++)
+            {
+                if (!this[row, col].ApproximatelyEquals(other[row, col], delta, relativeDelta, ulpsApart))
+                    return false;
+            }
+
+            return true;
+        }
+
+
 
 
 
@@ -266,6 +351,7 @@ namespace MathNet.GeometricAlgebra
         }
 
         public static Matrix Multiply(Matrix M, Matrix N) => M.Multiply(N);
+        
         public static Matrix operator *(Matrix M, Matrix N) => M.Multiply(N);
 
     }

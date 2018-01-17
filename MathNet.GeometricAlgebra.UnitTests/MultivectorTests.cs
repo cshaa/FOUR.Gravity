@@ -190,7 +190,7 @@ namespace MathNet.GeometricAlgebra.UnitTests
 
 
         [Test]
-        public void Constructor()
+        public void MultivectorConstructor()
         {
             var A = new Multivector(R3)
             {
@@ -199,9 +199,9 @@ namespace MathNet.GeometricAlgebra.UnitTests
                 [E3] = -1 / 12d
             };
 
-            Assert.AreEqual(A[1], 3.5);
-            Assert.AreEqual(A[2], 0.14);
-            Assert.AreEqual(A[4], -1 / 12d);
+            Assert.AreEqual(3.5, A[1]);
+            Assert.AreEqual(0.14, A[2]);
+            Assert.AreEqual(-1/12d, A[4]);
 
 #pragma warning disable CS1718 // Comparison made to same variable
 
@@ -218,7 +218,7 @@ namespace MathNet.GeometricAlgebra.UnitTests
 
 
         [Test]
-        public void CopyAndEquals()
+        public void MultivectorCopy()
         {
 
             var A = new Multivector(R3)
@@ -255,7 +255,7 @@ namespace MathNet.GeometricAlgebra.UnitTests
 
 
         [Test]
-        public void Clone()
+        public void MultivectorClone()
         {
             var A = M["Vector3A"].Clone();
 
@@ -274,7 +274,7 @@ namespace MathNet.GeometricAlgebra.UnitTests
 
 
         [Test]
-        public void AdditionAndSubtraction()
+        public void MultivectorAddAndSub()
         {
             var A = M["Vector3A"].Clone();
             var B = M["Vector3B"].Clone();
@@ -338,7 +338,7 @@ namespace MathNet.GeometricAlgebra.UnitTests
 
 
         [Test]
-        public void MultiplicationAndDistributivity()
+        public void GeometricProduct()
         {
             var A = M["Vector3A"].Clone();
             var B = M["Vector3B"].Clone();
@@ -375,7 +375,7 @@ namespace MathNet.GeometricAlgebra.UnitTests
 
 
         [Test]
-        public void WedgeMultiplication()
+        public void WedgeProductn()
         {
             var A = M["Vector3A"].Clone().VectorPart;
             var B = M["Vector3B"].Clone().VectorPart;

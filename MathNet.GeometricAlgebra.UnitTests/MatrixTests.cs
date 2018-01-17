@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using static MathNet.GeometricAlgebra.Constants.Basis;
+using static System.Math;
 
 namespace MathNet.GeometricAlgebra.UnitTests
 {
@@ -52,6 +53,32 @@ namespace MathNet.GeometricAlgebra.UnitTests
                 { 1, -1, 2 },
                 { 2, 3, 1 }
             });
+        }
+
+
+
+        [Test]
+        public void MatrixConstructor()
+        {
+            var A = new Matrix(R3, R4, new double[,]
+            {
+                { 5, 8 ,3 },
+                { 6, 2, -1 },
+                { PI, 5, 8 },
+                { 0, 1/13d, 0 }
+            });
+
+            Assert.AreEqual(5, A[0,0]);
+            Assert.AreEqual(PI, A[2,0]);
+            Assert.AreEqual(1 / 13d, A[3,1]);
+
+#pragma warning disable CS1718 // Comparison made to same variable
+
+            Assert.IsTrue(A == A);
+            Assert.IsTrue(A.Equals(A));
+            Assert.IsFalse(A != A);
+
+#pragma warning restore CS1718 // Comparison made to same variable
         }
     }
 }
