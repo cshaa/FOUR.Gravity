@@ -95,7 +95,6 @@ namespace MathNet.GeometricAlgebra
         }
 
 
-
         override public bool Equals(object M) => Equals(M as Matrix);
 
         public static bool operator ==(Matrix M, Matrix N)
@@ -112,7 +111,7 @@ namespace MathNet.GeometricAlgebra
 
         public static bool operator !=(Matrix M, Matrix N)
         {
-            // cast to use the operator !=(object, object) and avoid recursion
+            // cast to use the operator ==(object, object) and avoid recursion
             if (((object)M) == null || ((object)N) == null)
                 return !Equals(M, N);
 
@@ -153,6 +152,8 @@ namespace MathNet.GeometricAlgebra
 
 
 
+
+        // Rows and Columns
 
         /// <summary>Returns the number of rows, equal to the dimension of the target space.</summary>
         public uint RowCount => TargetSpace.Dimension;
@@ -243,6 +244,9 @@ namespace MathNet.GeometricAlgebra
 
 
 
+
+        // Add
+
         public Matrix Add(Matrix M)
         {
             if (SourceSpace != M.SourceSpace || TargetSpace != M.TargetSpace)
@@ -260,6 +264,11 @@ namespace MathNet.GeometricAlgebra
         public static Matrix Add(Matrix M, Matrix N) => M.Clone().Add(N);
         public static Matrix operator +(Matrix M, Matrix N) => Add(M, N);
 
+
+
+
+
+        // Subtract
 
         public Matrix Sub(Matrix M) => Subtract(M);
         public Matrix Subtract(Matrix M)
@@ -280,6 +289,11 @@ namespace MathNet.GeometricAlgebra
         public static Matrix operator -(Matrix M, Matrix N) => Subtract(M, N);
 
 
+
+
+
+        // Negate
+
         public Matrix Negate()
         {
             for (int row = 0; row < RowCount; row++)
@@ -294,6 +308,10 @@ namespace MathNet.GeometricAlgebra
         public static Matrix operator -(Matrix M) => Negate(M);
 
 
+
+
+
+        // Multiply
 
         /// <summary>
         /// Returns the product of this matrix and vector v.
@@ -354,5 +372,16 @@ namespace MathNet.GeometricAlgebra
         
         public static Matrix operator *(Matrix M, Matrix N) => M.Multiply(N);
 
+
+
+
+
+
+        // Gaussian elimination
+
+        public Matrix PerformGaussianElimination()
+        {
+
+        }
     }
 }

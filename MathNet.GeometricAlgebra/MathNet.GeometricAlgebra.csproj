@@ -3,10 +3,18 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net471</TargetFrameworks>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <Configurations>Debug;Release;PerformanceTesting</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MathNet.Numerics" Version="3.20.0" />
+    <PackageReference Include="MathNet.Numerics" Version="3.20.1" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.netcore.app\2.0.0\ref\netcoreapp2.0\System.Collections.Immutable.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using MathNet.Extensions;
 using static MathNet.Numerics.Combinatorics;
@@ -8,42 +10,58 @@ namespace MathNet.GeometricAlgebra
 {
     public class Space
     {
-        public uint Dimension { get; }
-        public uint PositiveDimension { get; }
-        public uint NegativeDimension { get; }
-        public uint NilpotentDimension { get; }
+        virtual public int Dimension { get; }
+        virtual public int PositiveDimension { get; }
+        virtual public int NegativeDimension { get; }
+        virtual public int NilpotentDimension { get; }
 
-        public Space(uint positive, uint negative = 0, uint nil = 0)
+        public Multivector Zero { get; }
+
+        public Space(int positive, int negative = 0, int nil = 0) : this()
         {
+            if (positive < 0 || negative < 0 || nil < 0)
+                throw new ArgumentOutOfRangeException();
+
             var dimension = positive + negative + nil;
 
             if (dimension <= 30)
             {
-                Dimension = dimension;
-                PositiveDimension = positive;
-                NegativeDimension = negative;
-                NilpotentDimension = nil;
+                Dimension = (int)dimension;
+                PositiveDimension = (int)positive;
+                NegativeDimension = (int)negative;
+                NilpotentDimension = (int)nil;
             }
             else throw new ArgumentOutOfRangeException("The total dimension cannot be greater than 30.");
             // “No one will ever need 34.3 T of memory.” —Bill Gates
 
             SetUpConversionBetweenIndexAndBladeBasis();
+
+            Zero = new Multivector(this, ImmutableArray.CreateRange(Enumerable.Repeat(0.0, Dimension)));
         }
 
-        public Multivector Zero
-        {
-            get => new Multivector(this);
-        }
+        protected Space() { }
+        
+
+
+
+        public static Space DegenerateSplitComplexSpace { get; } = new Space(1);
+        public static Space DegenerateScalarSpace { get; } = new Space(0);
+        public static Space NullSpace { get; } = new NullSpace();
+
+
 
         public int BasisSquared(uint grade, uint component)
         {
+            if (this is NullSpace)
+                throw new InvalidOperationException("There is no basis in null space.");
+
             if (grade == 1)
             {
                 if (component < PositiveDimension) return 1;
-                else component -= PositiveDimension;
+                else component -= (uint)PositiveDimension;
 
                 if (component < NegativeDimension) return -1;
-                else component -= NegativeDimension;
+                else component -= (uint)NegativeDimension;
 
                 if (component < NilpotentDimension) return 0;
                 else throw new IndexOutOfRangeException("Base number out of range");
@@ -54,6 +72,9 @@ namespace MathNet.GeometricAlgebra
 
         public int BasisSquared(ulong index)
         {
+            if (this is NullSpace)
+                throw new InvalidOperationException("There is no basis in null space.");
+
             var grade = BladeBasisFromIndex(index).Grade;
             int sign = grade % 4 < 2 ? 1 : -1; //see below
             while (index != 0)
@@ -101,7 +122,10 @@ namespace MathNet.GeometricAlgebra
 
         public (ulong Index, int Sign) BasisMultiply(ulong e, ulong f)
         {
-            if(e==1 && f==1)
+            if (this is NullSpace)
+                throw new InvalidOperationException("There is no basis in null space.");
+
+            if (e==1 && f==1)
             {
                 Console.WriteLine();
             }
@@ -144,10 +168,14 @@ namespace MathNet.GeometricAlgebra
         (uint, uint)[] bladeBasisFromIndexCache;
 
         public ulong IndexFromBladeBasis(uint grade, uint component)
-            => indexFromBladeBasisCache[grade][component];
+            => (this is NullSpace)
+            ? throw new InvalidOperationException("There is no basis in null space.")
+            : indexFromBladeBasisCache[grade][component];
 
         public (uint Grade, uint Component) BladeBasisFromIndex(ulong index)
-            => bladeBasisFromIndexCache[index];
+            => (this is NullSpace)
+            ? throw new InvalidOperationException("There is no basis in null space.")
+            : bladeBasisFromIndexCache[index];
 
 
 
@@ -218,4 +246,20 @@ namespace MathNet.GeometricAlgebra
         }
 
     }
+
+
+    public class NullSpace : Space
+    {
+        public NullSpace() : base() { }
+        override public int Dimension { get; } = -1;
+        override public int PositiveDimension { get; } = -1;
+        override public int NegativeDimension { get; } = -1;
+        override public int NilpotentDimension { get; } = -1;
+
+        public override bool Equals(object obj)
+            => obj is NullSpace;
+
+        public override int GetHashCode() => 0;
+    }
+
 }

@@ -375,7 +375,7 @@ namespace MathNet.GeometricAlgebra.UnitTests
 
 
         [Test]
-        public void WedgeProductn()
+        public void WedgeProduct()
         {
             var A = M["Vector3A"].Clone().VectorPart;
             var B = M["Vector3B"].Clone().VectorPart;

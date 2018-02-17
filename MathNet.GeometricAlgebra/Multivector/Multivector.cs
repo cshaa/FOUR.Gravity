@@ -5,39 +5,43 @@ using System.Collections.Generic;
 using System.Text;
 using static MathNet.Numerics.Combinatorics;
 using MathNet.Numerics.LinearAlgebra;
+using System.Collections.Immutable;
 
 namespace MathNet.GeometricAlgebra
 {
     
-
-    public class Multivector : IApproximatelyEquatable<Multivector>, IFormattable
+    public struct Multivector : IImmutableMultivector
     {
         /// <summary>List of elements. Try to avoid using it thoughtlessly, as its
         /// behaviour may be overriden by inheriting classes.</summary>
-        public IList<double> Elements { get => _Elements; }
-        protected IList<double> _Elements;
+        public IImmutableList<double> Elements;
+        IReadOnlyList<double> IMultivector.Elements => Elements;
 
-        public Space Space { get => _Space; }
-        protected Space _Space;
-
-
+        public Space Space;
+        Space IMultivector.Space => Space;
 
 
 
-        // Basic OOP methods
 
 
-        protected Multivector() { }
+
+
+
 
         /**
          * <summary>Creates new multivector in the Clifford algebra <paramref name="space"/>.</summary>
          * <param name="space">The Clifford algebra this multivector is an element of.</param>
          */
         public Multivector(Space space)
-            : this(space, new double[1ul << (int)space.Dimension]) { }
+            : this(space, space.Zero.Elements) { }
 
         /// <see cref="Multivector(Space)"/>
         public static Multivector Create(Space space) => new Multivector(space);
+
+
+
+        public Multivector(Space space, IEnumerable<double> elements)
+            : this(space, ImmutableArray.CreateRange(elements)) { }
         
         
 
@@ -49,53 +53,34 @@ namespace MathNet.GeometricAlgebra
          *  <param name="space">The Clifford algebra this multivector will be an element of.</param>
          *  <param name="elements">List that will be used to store the elements of the multivector.</param>
          */
-        public Multivector(Space space, IList<double> elements)
+        public Multivector(Space space, IImmutableList<double> elements)
         {
             var l = 1 << (int)space.Dimension;
 
             if (elements.Count != l)
                 throw new ArgumentException("The multivector's element storage has to be of length "+l+".");
 
-            _Space = space;
-            _Elements = elements;
+            Space = space;
+            Elements = elements;
         }
 
         /// <see cref="Multivector(Space, IList{Double})"/>
-        public static Multivector Create(Space space, IList<double> elements)
+        public static Multivector Create(Space space, IImmutableList<double> elements)
             => new Multivector(space, elements);
 
 
 
         /// <summary>Returns/sets the scalar part (the grade zero part) of the multivector.</summary>
-        public double ScalarPart
-        {
-            get => this[0];
-            set => this[0] = value;
-        }
+        public double ScalarPart => this[0];
         
 
 
         /// <summary>
-        /// Returns/sets the vector part (the grade one part) of the multivector.
+        /// Returns the vector part (the grade one part) of the multivector.
         /// The resulting <see cref="Vector"/> is a copy of the elements, not a reference.
         /// </summary>
-        public Vector VectorPart
-        {
-            get => (Vector)GetGrade(1);
-
-            set
-            {
-                if (Space != value.Space)
-                    throw new ArgumentException("The vector is from a different space than this multivector");
-
-                var l = value.Elements.Count;
-
-                for (uint i = 0; i < l; i++)
-                {
-                    this[(int)Space.IndexFromBladeBasis(1, i)] = value.Elements[(int)i];
-                }
-            }
-        }
+        public Vector VectorPart => (Vector)GetGrade(1);
+        
 
 
 
@@ -113,38 +98,18 @@ namespace MathNet.GeometricAlgebra
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        public virtual double this[int index]
-        {
-            get => Elements[index];
-            set => Elements[index] = value;
-        }
+        public double this[int index] => Elements[index];
+        
 
 
         /// <summary>The largest number passed to <see cref="this[int]"/> should be less than `this.Count`.</summary>
         public int Count => 1 << (int)Space.Dimension;
 
 
+        
 
 
-        /// <summary>Copy elements from M to this multivector.</summary>
-        /// <param name="M">The multivector to copy.</param>
-        /// <returns>Returns `this` for chaining.</returns>
-        public Multivector Copy(Multivector M)
-        {
-            if (Space != M.Space) throw new ArgumentException("Cannot copy a multivector from a different space.");
-            
-            for (int i = 0, l = Count; i < l; i++)
-            {
-                this[i] = M[i];
-            }
-
-            return this;
-        }
-
-        public Multivector(Multivector M) : this(M.Space) => Copy(M);
-        public Multivector Clone() => new Multivector(Space).Copy(this);
-        public static Multivector Clone(Multivector M) => M.Clone();
-
+        // IFormattable.ToString
 
         public string ToString(string format, IFormatProvider formatProvider)
         {
@@ -198,7 +163,7 @@ namespace MathNet.GeometricAlgebra
 
         // Grade
 
-        public PureGrade GetGrade(uint k)
+        public PureGrade GetGrade(int k)
         {
             var pureGrade = k == 1
                 ? new Vector(Space)
@@ -206,9 +171,9 @@ namespace MathNet.GeometricAlgebra
 
             var l = pureGrade.Elements.Count;
 
-            for (uint i = 0; i < l; i++)
+            for (int i = 0; i < l; i++)
             {
-                pureGrade.Elements[(int)i] = this[(int)Space.IndexFromBladeBasis(k, i)];
+                pureGrade.Elements[i] = this[(int)Space.IndexFromBladeBasis(k, i)];
             }
 
             return pureGrade;
@@ -239,43 +204,37 @@ namespace MathNet.GeometricAlgebra
         /// </summary>
         /// <param name="M">The other Multivector</param>
         /// <returns>True if the Multivectors are from the space and their coordinates are identical, false otherwise.</returns>
-        public bool Equals(Multivector other)
+        public bool Equals(Multivector? other)
         {
             if (other == null) return false;
-            if (Space != other.Space) return false;
-            
+            if (Space != other?.Space) return false;
+            return MultivectorMethods.AreEqual(Elements, other?.Elements);
+        }
 
-            if (Elements is ISparseList<double> A
-            && other.Elements is ISparseList<double> B)
-            {
-                foreach (var i in A.Keys.Union(B.Keys))
-                    if (Elements[i] != other.Elements[i]) return false;
-
-                return true;
-            }
-
-            for (int i = 0; i < Count; i++)
-                if (this[i] != other[i]) return false;
-
-            return true;
+        public bool Equals(IMultivector other)
+        {
+            if (other == null) return false;
+            if (Space != other?.Space) return false;
+            return MultivectorMethods.AreEqual(this, other);
         }
 
 
 
-        override public bool Equals(object M) => Equals(M as Multivector);
+        override public bool Equals(object M) => Equals(M as Multivector?);
 
-        public static bool operator ==(Multivector M, Multivector N)
+        public static bool operator ==(Multivector? M, Multivector? N)
         {
+            // cast to use the operator ==(object, object) and avoid recursion
             if ( ((object)M) == null || ((object)N) == null )
                 return Equals(M, N);
 
             return M.Equals(N);
         }
 
-        public static bool operator ==(Multivector M, object N) => M == N as Multivector;
-        public static bool operator ==(object M, Multivector N) => M as Multivector == N;
+        public static bool operator ==(Multivector? M, object N) => M == N as Multivector?;
+        public static bool operator ==(object M, Multivector? N) => M as Multivector? == N;
 
-        public static bool operator !=(Multivector M, Multivector N)
+        public static bool operator !=(Multivector? M, Multivector? N)
         {
             // cast to use the operator ==(object, object) and avoid recursion
             if (((object)M) == null || ((object)N) == null)
@@ -285,8 +244,8 @@ namespace MathNet.GeometricAlgebra
         }
 
 
-        public static bool operator !=(Multivector M, object N) => M != N as Multivector;
-        public static bool operator !=(object M, Multivector N) => M as Multivector != N;
+        public static bool operator !=(Multivector? M, object N) => M != N as Multivector?;
+        public static bool operator !=(object M, Multivector? N) => M as Multivector? != N;
 
         override public int GetHashCode()
         {
@@ -299,7 +258,7 @@ namespace MathNet.GeometricAlgebra
         }
 
 
-        public bool ApproximatelyEquals(Multivector other, double? delta = null, double? relativeDelta = null, long? ulpsApart = null)
+        public bool ApproximatelyEquals(IMultivector other, double? delta = null, double? relativeDelta = null, long? ulpsApart = null)
         {
             if (other == null) return false;
             if (Space != other.Space) return false;
@@ -595,6 +554,15 @@ namespace MathNet.GeometricAlgebra
         public static Multivector Conjugate(Multivector M)
             => M.Clone().Conjugate();
 
+        public IMultivector Copy(IMultivector other)
+        {
+            throw new NotImplementedException();
+        }
+
+        IMultivector IMultivector.Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }

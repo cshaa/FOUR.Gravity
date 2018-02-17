@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathNet.Extensions
+namespace SystemGenericArithmetics
 {
 
     public static class FloatingPoint
